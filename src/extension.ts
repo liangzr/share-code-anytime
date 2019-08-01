@@ -17,7 +17,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let shareWithPastebin = vscode.commands.registerCommand('shareCode.shareWithPastebin', () => {
 		if (ensureEditorActived()) {
-			new ShareCode().shareWithPastebin();	
+			vscode.window.showInformationMessage('Share With Pastebin is coming soon');
+			// new ShareCode().shareWithPastebin();	
 		}
 	});
 
