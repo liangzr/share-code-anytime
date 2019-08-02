@@ -10,7 +10,7 @@
 	"categories": [
 		"Other"
 	],
-	"icon": "images/icon.svg",
+	"icon": "assets/logo.png",
 	"activationEvents": [
 		"onCommand:shareCode.openRemoteRepository",
 		"onCommand:shareCode.shareWithPastebin"
