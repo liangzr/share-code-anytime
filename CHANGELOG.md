@@ -1,9 +1,5 @@
 # Change Log
 
-All notable changes to the "share-code" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+## [0.2.2] - 2019-08-02
+### Changed
+- Compressed logo via tinypng.com
