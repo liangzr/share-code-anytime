@@ -7,7 +7,7 @@ import { run, runFile, runInWorkspace } from './shell';
 const GIT_REGEX = {
   SSH: /^git@(.*?):(.*?).git$/i,
   HTTP: /^((http|https).*?).git$/i,
-  REMOTE: /(git.*?\.git)/i,
+  REMOTE: /((git|http).*?\.git)/i,
   BRANCH: /^On branch (.*?)\n/i,
 };
 
