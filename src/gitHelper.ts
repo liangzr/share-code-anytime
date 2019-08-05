@@ -2,25 +2,28 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { prefixHttp, isGitHub } from './util';
-import { run, runFile, runInWorkspace } from './shell';
+import { runInWorkspace } from './shell';
 
 const GIT_REGEX = {
   SSH: /^git@(.*?):(.*?).git$/i,
   HTTP: /^((http|https).*?).git$/i,
   REMOTE: /((git|http).*?\.git)/i,
-  BRANCH: /^On branch (.*?)\n/i,
+  BRANCHS: /^##\s(.+?)[\s\n]/i,
+  SPLIT_BRANCH: /\.{3}.*?\//i,
 };
 
 export namespace git {
+  
   export class GitRepository {
 
     branch: string = 'master';
+    remoteBranch: string | undefined;
     filePath: string = '';
     remote: string | undefined;
 
     constructor() {
       this.remote = this.getRemote();
-      this.branch = this.getBranch();
+      [this.branch, this.remoteBranch] = this.getBranch();
       this.filePath = this.getFilePath();
     }
 
@@ -29,7 +32,7 @@ export namespace git {
       return repoStatus.indexOf('not a git repository') === -1;
     }
     
-    public genRemoteURLWithSelection(selection: vscode.Selection): string {
+    public async genRemoteURLWithSelection(selection: vscode.Selection): Promise<string> {
       let highlightSuffix: string = '';
 
       if (!selection.isEmpty) {
@@ -41,10 +44,18 @@ export namespace git {
           highlightSuffix += (selection.end.line + 1);
         }
       }
+      
+      let targetBranch = this.remoteBranch; 
+      
+      if (!this.remoteBranch) {
+        targetBranch = await vscode.window.showQuickPick(['master', this.branch], {
+          placeHolder: 'The current branch ' + this.branch + ' has no upstream branch, open it on master?'
+        });
+      }
 
       const repoURL = GitRepository.normalizeRepositoryURL(this.remote as string);
 
-      return path.join(repoURL, 'blob', this.branch, this.filePath) + highlightSuffix; 
+      return path.join(repoURL, 'blob', targetBranch as string, this.filePath) + highlightSuffix; 
     }
     
     public hasRemote() {
@@ -77,14 +88,14 @@ export namespace git {
       return vscode.workspace.asRelativePath(filePath);
     }
 
-    private getBranch(): string {
-      const branchStatus: string = runInWorkspace('git status');
+    private getBranch(): string[] {
+      const repoStatus: string = runInWorkspace('git status -bs');
       
-      if (GIT_REGEX.BRANCH.test(branchStatus)) { 
-        return RegExp.$1; 
+      if (GIT_REGEX.BRANCHS.test(repoStatus)) {
+          return RegExp.$1.split(GIT_REGEX.SPLIT_BRANCH);
       }
 
-      return '';
+      return ['master'];
     }
     
   }

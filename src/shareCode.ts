@@ -8,11 +8,11 @@ interface ServiceQuickPick extends vscode.QuickPickItem {
 }
 
 export class ShareCode {
-  public openRemoteRepository() {
+  public async openRemoteRepository() {
     if (git.GitRepository.detectGitRepository()) {
       const repo = new git.GitRepository();
       if (repo.hasRemote()) {
-        const url = repo.genRemoteURLWithSelection(this.getSelection());
+        const url = await repo.genRemoteURLWithSelection(this.getSelection());
         this.openURL(url);
       } else {
         vscode.window.showErrorMessage('This repository is no configured push distination, git remote add <name> <url>');
