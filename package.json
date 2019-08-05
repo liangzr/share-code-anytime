@@ -2,7 +2,7 @@
 	"name": "share-code",
 	"displayName": "Share Code Anytime",
 	"description": "Share your code in anytime",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"publisher": "liangzr",
 	"engines": {
 		"vscode": "^1.36.0"
