@@ -1,39 +1,37 @@
 import * as vscode from 'vscode';
-import { git } from './gitHelper';
-// import { getPastebinURL } from './pastebin';
+import * as opn from 'opn';
+import GitRepository from './git';
 
-const opn = require('opn');
+export default class ShareCode {
+  public static async openRemoteRepository() {
+    if (GitRepository.ensureGitRepository()) {
+      const repo = new GitRepository();
+      if (repo.hasRemoteRepo()) {
+        const url = await repo.createRemoteURL(ShareCode.getSelection());
 
-interface ServiceQuickPick extends vscode.QuickPickItem {
-}
-
-export class ShareCode {
-  public async openRemoteRepository() {
-    if (git.GitRepository.detectGitRepository()) {
-      const repo = new git.GitRepository();
-      if (repo.hasRemote()) {
-        const url = await repo.genRemoteURLWithSelection(this.getSelection());
-        this.openURL(url);
+        if (url) {
+          ShareCode.openURL(url);
+        }
       } else {
-        vscode.window.showErrorMessage('This repository is no configured push distination, git remote add <name> <url>');
+        vscode.window.showErrorMessage('This repository is no configured push-distination, use `git remote add <name> <url>.`');
       }
     } else {
-      vscode.window.showOpenDialog({});
-      this.shareWithPastebin();
+      vscode.window.showInformationMessage('Share Code only support git repository now.');
     }
   }
-  public shareWithPastebin() {
-    // getPastebinURL().then((url: string) => this.openURL(url));
+
+  /**
+   * Get current user selection
+   */
+  private static getSelection(): vscode.Selection | undefined {
+    return vscode.window.activeTextEditor!.selection;
   }
 
-  private getSelection(): vscode.Selection {
-    let textEditor: vscode.TextEditor;
-    textEditor = (vscode.window.activeTextEditor as vscode.TextEditor);
-    
-    return textEditor.selection;
-  }
-
-  private openURL(url: string) {
+  /**
+   * Open a website via native
+   * @param url Web URL
+   */
+  private static openURL(url: string) {
     opn(url);
   }
 }

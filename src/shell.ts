@@ -1,40 +1,50 @@
 import * as cp from 'child_process';
 import * as vscode from 'vscode';
 
-export function run<TOut extends string | Buffer>(
+/**
+ * Execute shell script
+ * @param command shell script
+ * @param options exec options
+ */
+export function exec(
   command: string,
-  options?: cp.ExecSyncOptions
-): TOut {
+  options?: cp.ExecSyncOptions,
+) {
   try {
-    const ret = cp.execSync(command, options);
-    if (ret) {
-       return ret.toString() as TOut; 
-    }
-    return (ret as TOut);
+    return cp.execSync(command, options).toString();
   } catch (error) {
-    console.log(error);    
-    return ('' as TOut);
+    console.log(error);
+    return '';
   }
 }
 
-export function runInWorkspace<TOut extends string | Buffer>(
+/**
+ * Execute shell script in active workspace
+ * @param command shell script
+ * @param options exec options
+ */
+export function execInWorkspace(
   command: string,
-  options?: cp.ExecSyncOptions
-): TOut {
+  options?: cp.ExecSyncOptions,
+) {
   try {
-    return run(command, Object.assign(options || {}, {
-      cwd: vscode.workspace.rootPath
+    return exec(command, Object.assign(options || {}, {
+      cwd: vscode.workspace.rootPath,
     }));
   } catch (error) {
-    console.log(error);    
-    return ('' as TOut);
+    console.log(error);
+    return '';
   }
 }
 
-export function runFile<TOut extends string | Buffer>(
+/**
+ * Execute shell script file
+ * @param file shell script file
+ * @param options exec options
+ */
+export function execFile(
   file: string,
-  options?: cp.ExecFileSyncOptions
-): TOut {
-  const ret = cp.execFileSync(file, options).toString();
-  return (ret as TOut);
+  options?: cp.ExecFileSyncOptions,
+) {
+  return cp.execFileSync(file, options).toString();
 }
