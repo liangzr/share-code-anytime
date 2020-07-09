@@ -3,6 +3,9 @@ import * as opn from 'opn';
 import GitRepository from './git';
 
 export default class ShareCode {
+  /**
+   * Open code or file in corresponding remote repository
+   */
   public static async openRemoteRepository() {
     if (GitRepository.ensureGitRepository()) {
       const repo = new GitRepository();
