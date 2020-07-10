@@ -1,20 +1,32 @@
 import * as vscode from 'vscode';
 import * as opn from 'opn';
 import GitRepository from './git';
+import NodeModule from './npm';
+import { isGitHub } from './util';
 
 export default class ShareCode {
   /**
    * Open code or file in corresponding remote repository
    */
   public static async openRemoteRepository() {
-    if (GitRepository.ensureGitRepository()) {
+    if (NodeModule.insideNodeModules()) {
+      const module = new NodeModule();
+      if (module.repository) {
+        const activedFile = vscode.window.activeTextEditor!.document.fileName;
+        const filepathInGit = activedFile.replace(module.moduleRoot, '');
+        const suffix = GitRepository.createHighlightSuffix(isGitHub(module.repository));
+        const url = GitRepository.createRemoteURL(module.repository, 'master', filepathInGit, suffix);
+
+        ShareCode.openURL(url);
+      } else {
+        vscode.window.showErrorMessage('This project in node_modules do not have a `repository` field.');
+      }
+    } else if (GitRepository.ensureGitRepository()) {
       const repo = new GitRepository();
       if (repo.hasRemoteRepo()) {
-        const url = await repo.createRemoteURL(ShareCode.getSelection());
+        const url = await repo.createRemoteURL();
 
-        if (url) {
-          ShareCode.openURL(url);
-        }
+        ShareCode.openURL(url);
       } else {
         vscode.window.showErrorMessage('This repository is no configured push-distination, use `git remote add <name> <url>.`');
       }
@@ -24,17 +36,10 @@ export default class ShareCode {
   }
 
   /**
-   * Get current user selection
-   */
-  private static getSelection(): vscode.Selection | undefined {
-    return vscode.window.activeTextEditor!.selection;
-  }
-
-  /**
    * Open a website via native
    * @param url Web URL
    */
   private static openURL(url: string) {
-    opn(url);
+    if (url) opn(url);
   }
 }

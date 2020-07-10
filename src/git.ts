@@ -6,6 +6,7 @@ import { execInWorkspace } from './shell';
 
 const GIT_REGEX = {
   SSH: /^git@(.*?):(.*?).git$/i,
+  SSH_PROTOCOL: /^git:\/\/(.*?).git$/i,
   HTTP: /^((http|https).*?).git$/i,
   REMOTE: /((git|http).*?\.git)/i,
   BRANCHS: /^##\s(.+?)[\s\n]/i,
@@ -50,20 +51,9 @@ export default class GitRepository {
 
   /**
    * Create remote url of selected code or file
-   * @param selection user selection
    */
-  public async createRemoteURL(selection?: vscode.Selection): Promise<string> {
-    let highlightSuffix = '';
-
-    if (selection && !selection.isEmpty) {
-      highlightSuffix += `#L${selection.start.line + 1}-`;
-
-      if (isGitHub(this.remoteRepo as string)) {
-        highlightSuffix += `L${selection.end.line + 1}`;
-      } else {
-        highlightSuffix += (selection.end.line + 1);
-      }
-    }
+  public async createRemoteURL(): Promise<string> {
+    const highlightSuffix = GitRepository.createHighlightSuffix(isGitHub(this.remoteRepo!));
 
     let targetBranch = this.remoteBranch;
 
@@ -80,6 +70,29 @@ export default class GitRepository {
     return path.join(repoURL, 'blob', targetBranch, this.filepath) + highlightSuffix;
   }
 
+  public static createHighlightSuffix(isGitHubRepo: boolean) {
+    const { selection } = vscode.window.activeTextEditor!;
+    let highlightSuffix = '';
+
+    if (selection && !selection.isEmpty) {
+      highlightSuffix += `#L${selection.start.line + 1}-`;
+
+      if (isGitHubRepo) {
+        highlightSuffix += `L${selection.end.line + 1}`;
+      } else {
+        highlightSuffix += (selection.end.line + 1);
+      }
+    }
+
+    return highlightSuffix;
+  }
+
+  public static createRemoteURL(repo: string, branch: string, filepath: string, suffix = '') {
+    const repoURL = GitRepository.normalizeRepoURL(repo);
+
+    return path.join(repoURL, 'blob', branch, filepath) + suffix;
+  }
+
   /**
    * If current projeect has a remote upstream.
    */
@@ -90,8 +103,12 @@ export default class GitRepository {
   private static normalizeRepoURL(remote: string = '') {
     if (GIT_REGEX.SSH.test(remote)) {
       return prefixHttps(path.join(RegExp.$1, RegExp.$2));
-    } if (GIT_REGEX.HTTP.test(remote)) {
+    }
+    if (GIT_REGEX.HTTP.test(remote)) {
       return RegExp.$1;
+    }
+    if (GIT_REGEX.SSH_PROTOCOL.test(remote)) {
+      return prefixHttps(RegExp.$1);
     }
 
     return remote;
