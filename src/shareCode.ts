@@ -3,6 +3,7 @@ import * as opn from 'opn';
 import GitRepository from './git';
 import NodeModule from './npm';
 import { isGitHub } from './util';
+import Pastebin from './pastebin';
 
 export default class ShareCode {
   /**
@@ -33,6 +34,19 @@ export default class ShareCode {
     } else {
       vscode.window.showInformationMessage('Share Code only support git repository now.');
     }
+  }
+
+  public static async shareWithPastebin() {
+    vscode.window.withProgress(
+      {
+        title: 'Upload to Pastebin.com...',
+        location: vscode.ProgressLocation.Notification,
+        cancellable: false,
+      },
+      () => Pastebin.post(),
+    ).then((url) => {
+      ShareCode.openURL(url);
+    });
   }
 
   /**

@@ -32,7 +32,7 @@
 			},
 			{
 				"command": "shareCode.shareWithPastebin",
-				"title": "Share Code: Share with Pastebin"
+				"title": "Share Code: Share with Pastebin (Public)"
 			}
 		]
 	},
@@ -60,6 +60,7 @@
 		"vscode-test": "^1.4.0"
 	},
 	"dependencies": {
+		"axios": "^0.19.2",
 		"opn": "^6.0.0"
 	},
 	"repository": {
