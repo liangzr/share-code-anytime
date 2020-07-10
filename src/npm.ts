@@ -54,7 +54,17 @@ export default class NodeModule {
     const editor = vscode.window.activeTextEditor;
     const filepath = editor!.document.fileName;
 
-    return MODULE_REGEX.ROOT.exec(filepath)?.[1] || vscode.workspace.rootPath!;
+    let rootPath = MODULE_REGEX.ROOT.exec(filepath)?.[1];
+
+    if (
+      rootPath
+      && rootPath.split('node_modules')[1].includes('@')
+      && !fs.existsSync(path.join(rootPath, 'package.json'))
+    ) {
+      rootPath = path.resolve(rootPath, '../');
+    }
+
+    return rootPath || vscode.workspace.rootPath!;
   }
 
   /**
