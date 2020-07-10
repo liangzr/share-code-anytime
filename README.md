@@ -11,8 +11,8 @@
 
 - [x] Open the corresponding code in remote repository
   - [x] Support GitHub, GitLab 
-  - [ ] Support the file in the `node_modules`
-- [ ] Share code in the Pastebin  
+  - [x] Support the file in the `node_modules`
+- [x] Share code in the Pastebin
 
 
 ## Usage
