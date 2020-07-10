@@ -20,8 +20,14 @@ export default class Pastebin {
         api_paste_name: path.basename(document.fileName),
       }));
 
+      if (res.data.includes('limit')) {
+        throw new Error(res.data);
+      }
+
       return res.data;
     } catch (error) {
+      vscode.window.showErrorMessage(error.message);
+
       return '';
     }
   }
