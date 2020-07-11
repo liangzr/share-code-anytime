@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.3.1] - 2020-07-11
+### Changed
+- New icon 🎉
+
+### Fixed
+- Optmizze path resolver for the node module
+
 ## [0.3.0] - 2020-07-10
 ### Added
 - Support share your code with `Pastebin.com`
